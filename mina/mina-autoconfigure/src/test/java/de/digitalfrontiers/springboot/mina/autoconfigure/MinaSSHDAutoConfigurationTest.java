@@ -27,57 +27,57 @@ class MinaSSHDAutoConfigurationTest {
       .withConfiguration(
           AutoConfigurations.of(MinaSSHDAutoConfiguration.class));
 
-//  @Test
-//  void autoconfigurationCreatesConfiguresAndStartsSshServer() {
-//    contextRunner.run(context -> {
-//      assertThat(context).hasNotFailed();
-//      assertThat(context).hasSingleBean(SshServer.class);
-//      assertThat(context).getBean(SshServer.class)
-//          .hasFieldOrPropertyWithValue("started", true);
-//    });
-//  }
+  @Test
+  void autoconfigurationCreatesConfiguresAndStartsSshServer() {
+    contextRunner.run(context -> {
+      assertThat(context).hasNotFailed();
+      assertThat(context).hasSingleBean(SshServer.class);
+      assertThat(context).getBean(SshServer.class)
+          .hasFieldOrPropertyWithValue("started", true);
+    });
+  }
 
 
 
-//  @Test
-//  void doesNotFailIfTheSshServerIsNotOnTheClasspath() {
-//    contextRunner
-//        // exclude the "key" trigger class
-//        .withClassLoader(new FilteredClassLoader(SshServer.class))
-//        // now the autoconfiguration will not run
-//        .run(context -> {
-//          assertThat(context).hasNotFailed();
-//        });
-//  }
+  @Test
+  void doesNotFailIfTheSshServerIsNotOnTheClasspath() {
+    contextRunner
+        // exclude the "key" trigger class
+        .withClassLoader(new FilteredClassLoader(SshServer.class))
+        // now the autoconfiguration will not run
+        .run(context -> {
+          assertThat(context).hasNotFailed();
+        });
+  }
 
 
 
-//  @Test
-//  void userDefinedShellFactoryWillBeUsedInsteadOfDefault() {
-//    contextRunner
-//        .withUserConfiguration(CustomShellFactoryConfiguration.class)
-//        .run(context -> {
-//          assertThat(context).hasNotFailed();
-//          assertThat(context).getBean(SshServer.class).satisfies(sshServer -> {
-//            assertThat(sshServer.getShellFactory())
-//                .isInstanceOf(DummyShellFactory.class);
-//          });
-//        });
-//  }
-//
-//  @Configuration
-//  public static class CustomShellFactoryConfiguration {
-//
-//    @Bean
-//    public ShellFactory shellFactory() {
-//      return new DummyShellFactory();
-//    }
-//  }
-//
-//  private static final class DummyShellFactory implements ShellFactory {
-//    @Override
-//    public Command createShell(ChannelSession channel) throws IOException {
-//      throw new UnsupportedOperationException();
-//    }
-//  }
+  @Test
+  void userDefinedShellFactoryWillBeUsedInsteadOfDefault() {
+    contextRunner
+        .withUserConfiguration(CustomShellFactoryConfiguration.class)
+        .run(context -> {
+          assertThat(context).hasNotFailed();
+          assertThat(context).getBean(SshServer.class).satisfies(sshServer -> {
+            assertThat(sshServer.getShellFactory())
+                .isInstanceOf(DummyShellFactory.class);
+          });
+        });
+  }
+
+  @Configuration
+  public static class CustomShellFactoryConfiguration {
+
+    @Bean
+    public ShellFactory shellFactory() {
+      return new DummyShellFactory();
+    }
+  }
+
+  private static final class DummyShellFactory implements ShellFactory {
+    @Override
+    public Command createShell(ChannelSession channel) throws IOException {
+      throw new UnsupportedOperationException();
+    }
+  }
 }
