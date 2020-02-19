@@ -1,0 +1,9 @@
+mina:
+  sshd:
+    port: 8022
+    users:
+      - username: admin
+        password: password
+      - username: user
+        password: user
+
