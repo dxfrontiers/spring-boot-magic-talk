@@ -19,10 +19,6 @@
     <module>mina-sshd-spring-boot-starter</module>
   </modules>
 
-  <properties>
-    <mina.version>2.4.0</mina.version>
-  </properties>
-
   <dependencyManagement>
     <dependencies>
       <dependency>

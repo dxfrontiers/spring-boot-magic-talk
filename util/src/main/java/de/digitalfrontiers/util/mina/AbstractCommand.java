@@ -48,8 +48,8 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
 
   protected void print(String s) {
     try {
-      out.write(encode(s));
-      out.flush();
+      getOutputStream().write(encode(s));
+      getOutputStream().flush();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -57,8 +57,8 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
 
   protected void print(char c) {
     try {
-      out.write(encode(new String(new char[]{c})));
-      out.flush();
+      getOutputStream().write(encode(new String(new char[]{c})));
+      getOutputStream().flush();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -66,8 +66,8 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
 
   protected void print(Object... elements) {
     try {
-      encodeAnsi(out, elements);
-      out.flush();
+      encodeAnsi(getOutputStream(), elements);
+      getOutputStream().flush();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -76,7 +76,7 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
 
   protected void println(String s) {
     try {
-      out.write(encode(s));
+      getOutputStream().write(encode(s));
       newLine();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -84,7 +84,7 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
   }
   protected void println(Object... elements) {
     try {
-      encodeAnsi(out, elements);
+      encodeAnsi(getOutputStream(), elements);
       newLine();
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -100,9 +100,9 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
   }
 
   private void newLine() throws IOException {
-    out.write('\r');
-    out.write('\n');
-    out.flush();
+    getOutputStream().write('\r');
+    getOutputStream().write('\n');
+    getOutputStream().flush();
   }
 
 
@@ -116,7 +116,7 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
     final StringBuilder sb = new StringBuilder();
     try {
 
-      writeAnsi(out, AnsiColor.BRIGHT_WHITE, AnsiStyle.BOLD);
+      writeAnsi(getOutputStream(), AnsiColor.BRIGHT_WHITE, AnsiStyle.BOLD);
 
       int read;
       while ((read = inReader.read()) != -1) {
@@ -133,7 +133,7 @@ public abstract class AbstractCommand extends AbstractCommandSupport {
       LOGGER.error("failed to read", e);
     } finally {
       try {
-        writeAnsiReset(out);
+        writeAnsiReset(getOutputStream());
       } catch (IOException e) {
         // ignore
       }
