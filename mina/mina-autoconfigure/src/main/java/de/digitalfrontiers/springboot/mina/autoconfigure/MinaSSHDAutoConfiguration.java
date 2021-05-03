@@ -20,24 +20,30 @@ import org.springframework.context.annotation.Configuration;
 import java.util.Optional;
 
 @ConditionalOnClass(SshServer.class)
-@EnableConfigurationProperties(SSHDProperties.class)
+@EnableConfigurationProperties(MinaSSHDProperties.class)
 @Configuration
 public class MinaSSHDAutoConfiguration {
 
   @Autowired
-  SSHDProperties properties;
+  MinaSSHDProperties config;
 
   @ConditionalOnMissingBean
   @Bean(initMethod = "start", destroyMethod = "stop")
   public SshServer sshServer(ShellFactory shellFactory) {
     final ServerBuilder builder = ServerBuilder.builder();
     final SshServer server = builder.build();
-    server.setPort(properties.getPort());
+    server.setPort(config.getPort());
 
     server.setKeyboardInteractiveAuthenticator(
         new DefaultKeyboardInteractiveAuthenticator());
     server.setPasswordAuthenticator(passwordAuthenticator());
-    server.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
+
+    server.getProperties().put(SshServer.IDLE_TIMEOUT, config.getSession().getIdleTimeout().toMillis());
+
+    if (config.getHostKeys() != null && config.getHostKeys().size() > 0)
+      server.setKeyPairProvider(new SpringResourceKeyPairProvider(config.getHostKeys()));
+    else
+      server.setKeyPairProvider(new SimpleGeneratorHostKeyProvider());
 
     server.setShellFactory(shellFactory);
 
@@ -50,14 +56,14 @@ public class MinaSSHDAutoConfiguration {
       public boolean authenticate(String username, String password, ServerSession session)
           throws PasswordChangeRequiredException, AsyncAuthException {
 
-        final Optional<SSHDProperties.UserDetail> userDetail = properties
+        final Optional<MinaSSHDProperties.User> user = config
             .getUsers()
             .stream()
-            .filter(details -> username.equals(details.getUsername()))
+            .filter(details -> username.equals(details.getName()))
             .findFirst();
 
-        return userDetail
-            .map(ud -> password.equals(ud.getPassword()))
+        return user
+            .map(u -> password.equals(u.getPassword()))
             .orElse(false);
       }
     };
