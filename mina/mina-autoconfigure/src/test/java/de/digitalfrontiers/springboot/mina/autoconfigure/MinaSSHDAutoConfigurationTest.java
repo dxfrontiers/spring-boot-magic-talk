@@ -3,6 +3,7 @@ package de.digitalfrontiers.springboot.mina.autoconfigure;
 import org.apache.sshd.server.SshServer;
 import org.apache.sshd.server.channel.ChannelSession;
 import org.apache.sshd.server.command.Command;
+import org.apache.sshd.server.keyprovider.SimpleGeneratorHostKeyProvider;
 import org.apache.sshd.server.shell.ShellFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
@@ -80,4 +81,52 @@ class MinaSSHDAutoConfigurationTest {
       throw new UnsupportedOperationException();
     }
   }
+
+
+  @Test
+  void sshKeysDefinedAndUsed() {
+    contextRunner
+        .withPropertyValues(
+            "mina.sshd.host-keys[0]=classpath:ssh_host_dsa_key",
+            "mina.sshd.host-keys[1]=classpath:ssh_host_rsa_key"
+        )
+        .run(context -> {
+          assertThat(context).getBean(SshServer.class).satisfies(sshServer -> {
+            assertThat(sshServer.getKeyPairProvider()).isInstanceOf(SpringResourceKeyPairProvider.class);
+          });
+        });
+  }
+
+  @Test
+  void noSshKeysDefinedFallbackToGeneratedKeyPairs() {
+    contextRunner
+        .run(context -> {
+          assertThat(context).getBean(SshServer.class).satisfies(sshServer -> {
+            assertThat(sshServer.getKeyPairProvider()).isInstanceOf(SimpleGeneratorHostKeyProvider.class);
+          });
+        });
+  }
+
+
+  @Test
+  void validateSshPortInjectionWorks() {
+    contextRunner
+        .withPropertyValues("mina.sshd.port=4711")
+        .withBean(SshPortReceiverBean.class)
+        .run(context -> {
+          assertThat(context).getBean(SshPortReceiverBean.class).satisfies(bean -> {
+            assertThat(bean.getPort()).isEqualTo(4711);
+          });
+        });
+  }
+
+  public static class SshPortReceiverBean {
+    @SshdPort
+    private int port;
+
+    public int getPort() {
+      return port;
+    }
+  }
+
 }
