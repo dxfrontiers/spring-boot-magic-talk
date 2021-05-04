@@ -5,4 +5,4 @@
 # result in errors. To circumvent this, we use the UserKnownHostsFile=/dev/null
 #
 # THIS SHOULD NEVER BE DONE WHEN RUNNING SSH IN PRODUCTION
-ssh admin@localhost -p 8022 -o StrictHostKeyChecking=no -o "UserKnownHostsFile=/dev/null"
+ssh admin@localhost -p 8122 -o StrictHostKeyChecking=no -o "UserKnownHostsFile=/dev/null"
